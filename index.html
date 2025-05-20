@@ -26,6 +26,7 @@
             background-color: #e6f3ff;
             color: #333;
             border: 2px solid #000;
+            font-size: 14px;
         }
         .debug-mode {
             background-color: #fff;
@@ -35,8 +36,7 @@
             white-space: pre-wrap;
         }
         .param {
-            font-size: 14px;
-            margin: 5px 0;
+            margin: 3px 0;
             text-align: center;
             width: 100%;
         }
@@ -45,30 +45,30 @@
             color: #004080;
         }
         .username {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: bold;
             color: #004080;
             animation: slideIn 1s ease-in;
         }
         .avatar-preview {
-            width: 80px;
-            height: 80px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             object-fit: cover;
-            margin: 10px 0;
-            box-shadow: 0 0 8px #004080;
+            margin: 5px 0;
+            box-shadow: 0 0 6px #004080;
         }
         .role-badge {
-            font-size: 16px;
-            margin: 5px 0;
+            font-size: 14px;
+            margin: 3px 0;
             color: #004080;
         }
         .status-indicator {
             display: inline-block;
-            width: 10px;
-            height: 10px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            margin-left: 5px;
+            margin-left: 4px;
             animation: pulse 2s infinite;
         }
         .status-online {
@@ -89,15 +89,19 @@
     </style>
 </head>
 <body>
-    <!-- Blue status card for testing, May 20 2025 -->
+    <!-- Blue status card for parameter testing, May 20 2025 -->
     <div class="card-wrapper" id="card">
         <div class="param"><span class="username" id="username">Loading...</span></div>
         <div class="param"><label>User ID:</label> <span id="userId">Loading...</span></div>
+        <div class="param"><label>Display Name:</label> <span id="displayName">Loading...</span></div>
         <div class="param"><label>Avatar:</label> <img class="avatar-preview" id="avatar" src="" alt="Avatar"></div>
         <div class="role-badge" id="roleBadge">Loading...</div>
         <div class="param"><label>Role:</label> <span id="role">Loading...</span></div>
-        <div class="param"><label>Join Date:</label> <span id="joinDate">Loading...</span></div>
         <div class="param"><label>Status:</label> <span id="status">Loading...</span><span class="status-indicator" id="statusIndicator"></span></div>
+        <div class="param"><label>Join Date:</label> <span id="joinDate">Loading...</span></div>
+        <div class="param"><label>Room:</label> <span id="roomId">Loading...</span></div>
+        <div class="param"><label>Level:</label> <span id="level">Loading...</span></div>
+        <div class="param"><label>Points:</label> <span id="points">Loading...</span></div>
     </div>
     <script>
         const params = new URLSearchParams(window.location.search);
@@ -112,16 +116,21 @@
         } else {
             const username = decodeURIComponent(params.get('username') || 'Guest');
             const userId = decodeURIComponent(params.get('userId') || 'Unknown');
+            const displayName = decodeURIComponent(params.get('displayName') || 'N/A');
             const avatar = decodeURIComponent(params.get('avatar') || '');
             const role = decodeURIComponent(params.get('role') || 'Member');
-            const joinDate = decodeURIComponent(params.get('joinDate') || 'N/A');
             const status = decodeURIComponent(params.get('status') || 'Offline');
+            const joinDate = decodeURIComponent(params.get('joinDate') || 'N/A');
+            const roomId = decodeURIComponent(params.get('roomId') || 'N/A');
+            const level = decodeURIComponent(params.get('level') || 'N/A');
+            const points = decodeURIComponent(params.get('points') || 'N/A');
 
             document.getElementById('username').textContent = username !== '$username$' && username.trim() !== '' ? username : 'Guest';
             document.getElementById('userId').textContent = userId !== '$userId$' && userId.trim() !== '' ? userId : 'Unknown';
+            document.getElementById('displayName').textContent = displayName !== '$displayName$' && displayName.trim() !== '' ? displayName : 'N/A';
 
             const avatarElement = document.getElementById('avatar');
-            const defaultAvatar = 'https://robohash.org/guest.png?size=80x80';
+            const defaultAvatar = 'https://robohash.org/guest.png?size=60x60';
             avatarElement.src = avatar && avatar !== '$avatar$' && avatar.trim() !== '' ? avatar : defaultAvatar;
             avatarElement.onerror = () => { avatarElement.src = defaultAvatar; };
 
@@ -131,13 +140,14 @@
             roleElement.textContent = validRole;
             roleBadge.textContent = validRole.toLowerCase() === 'admin' ? '🛡️ Admin' : validRole.toLowerCase() === 'moderator' ? '⭐ Moderator' : '👤 Member';
 
-            document.getElementById('joinDate').textContent = joinDate !== '$joinDate$' && joinDate.trim() !== '' ? joinDate : 'N/A';
-
-            const statusElement = document.getElementById('status');
+            document.getElementById('status').textContent = status !== '$status$' && status.trim() !== '' ? status : 'Offline';
             const statusIndicator = document.getElementById('statusIndicator');
-            const validStatus = status !== '$status$' && status.trim() !== '' ? status : 'Offline';
-            statusElement.textContent = validStatus;
-            statusIndicator.className = 'status-indicator ' + (validStatus.toLowerCase() === 'online' ? 'status-online' : 'status-offline');
+            statusIndicator.className = 'status-indicator ' + (status.toLowerCase() === 'online' ? 'status-online' : 'status-offline');
+
+            document.getElementById('joinDate').textContent = joinDate !== '$joinDate$' && joinDate.trim() !== '' ? joinDate : 'N/A';
+            document.getElementById('roomId').textContent = roomId !== '$roomId$' && roomId.trim() !== '' ? roomId : 'N/A';
+            document.getElementById('level').textContent = level !== '$level$' && level.trim() !== '' ? level : 'N/A';
+            document.getElementById('points').textContent = points !== '$points$' && points.trim() !== '' ? points : 'N/A';
         }
     </script>
 </body>
