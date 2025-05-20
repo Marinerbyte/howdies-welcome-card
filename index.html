@@ -27,6 +27,13 @@
             color: #333;
             border: 2px solid #000;
         }
+        .debug-mode {
+            background-color: #fff;
+            padding: 10px;
+            font-size: 12px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
         .param {
             font-size: 14px;
             margin: 5px 0;
@@ -37,11 +44,19 @@
             font-weight: bold;
             color: #004080;
         }
-        .user-id {
+        .username {
             font-size: 18px;
             font-weight: bold;
             color: #004080;
             animation: slideIn 1s ease-in;
+        }
+        .avatar-preview {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 10px 0;
+            box-shadow: 0 0 8px #004080;
         }
         .role-badge {
             font-size: 16px;
@@ -74,9 +89,11 @@
     </style>
 </head>
 <body>
-    <!-- Blue status card, general, new params, May 20 2025 -->
-    <div class="card-wrapper">
-        <div class="param"><span class="user-id" id="userId">Loading...</span></div>
+    <!-- Blue status card, debug mode, May 20 2025 -->
+    <div class="card-wrapper" id="card">
+        <div class="param"><span class="username" id="username">Loading...</span></div>
+        <div class="param"><label>User ID:</label> <span id="userId">Loading...</span></div>
+        <div class="param"><label>Avatar:</label> <img class="avatar-preview" id="avatar" src="" alt="Avatar"></div>
         <div class="role-badge" id="roleBadge">Loading...</div>
         <div class="param"><label>Role:</label> <span id="role">Loading...</span></div>
         <div class="param"><label>Join Date:</label> <span id="joinDate">Loading...</span></div>
@@ -84,27 +101,44 @@
     </div>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const userId = decodeURIComponent(params.get('userId') || 'Unknown');
-        const role = decodeURIComponent(params.get('role') || 'Member');
-        const joinDate = decodeURIComponent(params.get('joinDate') || 'N/A');
-        const status = decodeURIComponent(params.get('status') || 'Offline');
+        const debug = params.get('debug') === 'true';
+        const paramObj = {};
+        params.forEach((value, key) => { paramObj[key] = value; });
 
-        document.getElementById('userId').textContent = userId !== '$userId$' && userId.trim() !== '' ? userId : 'Unknown';
+        if (debug) {
+            const card = document.getElementById('card');
+            card.className = 'card-wrapper debug-mode';
+            card.innerHTML = `<pre>${JSON.stringify(paramObj, null, 2)}</pre>`;
+        } else {
+            const username = decodeURIComponent(params.get('username') || 'Guest');
+            const userId = decodeURIComponent(params.get('userId') || 'Unknown');
+            const avatar = decodeURIComponent(params.get('avatar') || '');
+            const role = decodeURIComponent(params.get('role') || 'Member');
+            const joinDate = decodeURIComponent(params.get('joinDate') || 'N/A');
+            const status = decodeURIComponent(params.get('status') || 'Offline');
 
-        const roleElement = document.getElementById('role');
-        const roleBadge = document.getElementById('roleBadge');
-        const validRole = role !== '$role$' && role.trim() !== '' ? role : 'Member';
-        roleElement.textContent = validRole;
-        roleBadge.textContent = validRole === 'Admin' ? '🛡️ Admin' : validRole === 'Moderator' ? '⭐ Moderator' : '👤 Member';
+            document.getElementById('username').textContent = username !== '$username$' && username.trim() !== '' ? username : 'Guest';
+            document.getElementById('userId').textContent = userId !== '$userId$' && userId.trim() !== '' ? userId : 'Unknown';
 
-        const joinDateElement = document.getElementById('joinDate');
-        joinDateElement.textContent = joinDate !== '$joinDate$' && joinDate.trim() !== '' ? joinDate : 'N/A';
+            const avatarElement = document.getElementById('avatar');
+            const defaultAvatar = 'https://robohash.org/guest.png?size=80x80';
+            avatarElement.src = avatar && avatar !== '$avatar$' && avatar.trim() !== '' ? avatar : defaultAvatar;
+            avatarElement.onerror = () => { avatarElement.src = defaultAvatar; };
 
-        const statusElement = document.getElementById('status');
-        const statusIndicator = document.getElementById('statusIndicator');
-        const validStatus = status !== '$status$' && status.trim() !== '' ? status : 'Offline';
-        statusElement.textContent = validStatus;
-        statusIndicator.className = 'status-indicator ' + (validStatus.toLowerCase() === 'online' ? 'status-online' : 'status-offline');
+            const roleElement = document.getElementById('role');
+            const roleBadge = document.getElementById('roleBadge');
+            const validRole = role !== '$role$' && role.trim() !== '' ? role : 'Member';
+            roleElement.textContent = validRole;
+            roleBadge.textContent = validRole.toLowerCase() === 'admin' ? '🛡️ Admin' : validRole.toLowerCase() === 'moderator' ? '⭐ Moderator' : '👤 Member';
+
+            document.getElementById('joinDate').textContent = joinDate !== '$joinDate$' && joinDate.trim() !== '' ? joinDate : 'N/A';
+
+            const statusElement = document.getElementById('status');
+            const statusIndicator = document.getElementById('statusIndicator');
+            const validStatus = status !== '$status$' && status.trim() !== '' ? status : 'Offline';
+            statusElement.textContent = validStatus;
+            statusIndicator.className = 'status-indicator ' + (validStatus.toLowerCase() === 'online' ? 'status-online' : 'status-offline');
+        }
     </script>
 </body>
 </html>
