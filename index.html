@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yasin's Tagda Card</title>
+    <title>Status Card</title>
     <style>
         html, body {
             margin: 0;
@@ -23,7 +23,7 @@
             align-items: center;
             font-family: Arial, sans-serif;
             padding: 10px;
-            background-color: #ffe6e6;
+            background-color: #e6f3ff;
             color: #333;
             border: 2px solid #000;
         }
@@ -35,69 +35,76 @@
         }
         .param label {
             font-weight: bold;
-            color: #a10000;
+            color: #004080;
         }
-        .avatar-preview {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            object-fit: cover;
-            margin: 10px 0;
-            box-shadow: 0 0 12px #f00;
-        }
-        .username {
+        .user-id {
             font-size: 18px;
             font-weight: bold;
-            color: #a10000;
-            animation: typing 2s steps(10, end);
+            color: #004080;
+            animation: slideIn 1s ease-in;
         }
-        .crown {
-            font-size: 28px;
-            color: #ffd700;
+        .role-badge {
+            font-size: 16px;
             margin: 5px 0;
+            color: #004080;
         }
-        .greeting {
-            font-size: 12px;
-            color: #a10000;
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-left: 5px;
+            animation: pulse 2s infinite;
         }
-        @keyframes typing {
-            from { width: 0; }
-            to { width: 100%; }
+        .status-online {
+            background-color: #00cc00;
+        }
+        .status-offline {
+            background-color: #999;
+        }
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
-    <!-- Red card for Yasin, new repo, May 20 2025 -->
+    <!-- Blue status card, general, new params, May 20 2025 -->
     <div class="card-wrapper">
-        <div class="param"><span class="username" id="username">Loading...</span></div>
-        <div class="crown">👑 Owner</div>
-        <div class="greeting">Yasin's the boss!</div>
-        <div class="param"><label>Avatar:</label> <img class="avatar-preview" id="avatar" src="" alt="Avatar"></div>
-        <div class="param"><label>Avatar Debug:</label> <span id="avatarDebug">Loading...</span></div>
-        <div class="param"><label>Membership:</label> <span id="membershipLevel">Loading...</span></div>
-        <div class="param"><label>Last Login:</label> <span id="lastLogin">Loading...</span></div>
+        <div class="param"><span class="user-id" id="userId">Loading...</span></div>
+        <div class="role-badge" id="roleBadge">Loading...</div>
+        <div class="param"><label>Role:</label> <span id="role">Loading...</span></div>
+        <div class="param"><label>Join Date:</label> <span id="joinDate">Loading...</span></div>
+        <div class="param"><label>Status:</label> <span id="status">Loading...</span><span class="status-indicator" id="statusIndicator"></span></div>
     </div>
     <script>
         const params = new URLSearchParams(window.location.search);
-        const username = decodeURIComponent(params.get('username') || 'Guest');
-        const avatar = decodeURIComponent(params.get('avatar') || '');
-        const membershipLevel = decodeURIComponent(params.get('membershipLevel') || 'none');
-        const lastLogin = decodeURIComponent(params.get('lastLogin') || 'none');
+        const userId = decodeURIComponent(params.get('userId') || 'Unknown');
+        const role = decodeURIComponent(params.get('role') || 'Member');
+        const joinDate = decodeURIComponent(params.get('joinDate') || 'N/A');
+        const status = decodeURIComponent(params.get('status') || 'Offline');
 
-        document.getElementById('username').textContent = username !== '$username$' && username.trim() !== '' ? username : 'Guest';
+        document.getElementById('userId').textContent = userId !== '$userId$' && userId.trim() !== '' ? userId : 'Unknown';
 
-        const avatarElement = document.getElementById('avatar');
-        const defaultAvatar = 'https://robohash.org/guest.png?size=80x80';
-        const avatarDebug = document.getElementById('avatarDebug');
-        avatarElement.src = avatar && avatar !== '$avatar$' && avatar.trim() !== '' ? avatar : defaultAvatar;
-        avatarElement.onerror = () => {
-            avatarElement.src = defaultAvatar;
-            avatarDebug.textContent = 'Used default: Invalid avatar URL';
-        };
-        avatarDebug.textContent = avatar ? `Raw: ${avatar}` : 'No avatar URL';
+        const roleElement = document.getElementById('role');
+        const roleBadge = document.getElementById('roleBadge');
+        const validRole = role !== '$role$' && role.trim() !== '' ? role : 'Member';
+        roleElement.textContent = validRole;
+        roleBadge.textContent = validRole === 'Admin' ? '🛡️ Admin' : validRole === 'Moderator' ? '⭐ Moderator' : '👤 Member';
 
-        document.getElementById('membershipLevel').textContent = membershipLevel !== '$membershipLevel$' && membershipLevel.trim() !== '' ? membershipLevel : 'none';
-        document.getElementById('lastLogin').textContent = lastLogin !== '$lastLogin$' && lastLogin.trim() !== '' ? lastLogin : 'none';
+        const joinDateElement = document.getElementById('joinDate');
+        joinDateElement.textContent = joinDate !== '$joinDate$' && joinDate.trim() !== '' ? joinDate : 'N/A';
+
+        const statusElement = document.getElementById('status');
+        const statusIndicator = document.getElementById('statusIndicator');
+        const validStatus = status !== '$status$' && status.trim() !== '' ? status : 'Offline';
+        statusElement.textContent = validStatus;
+        statusIndicator.className = 'status-indicator ' + (validStatus.toLowerCase() === 'online' ? 'status-online' : 'status-offline');
     </script>
 </body>
 </html>
