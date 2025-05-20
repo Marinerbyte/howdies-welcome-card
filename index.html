@@ -89,7 +89,7 @@
     </style>
 </head>
 <body>
-    <!-- Blue status card, debug mode, May 20 2025 -->
+    <!-- Blue status card with API fetch, May 20 2025 -->
     <div class="card-wrapper" id="card">
         <div class="param"><span class="username" id="username">Loading...</span></div>
         <div class="param"><label>User ID:</label> <span id="userId">Loading...</span></div>
@@ -102,43 +102,72 @@
     <script>
         const params = new URLSearchParams(window.location.search);
         const debug = params.get('debug') === 'true';
-        const paramObj = {};
-        params.forEach((value, key) => { paramObj[key] = value; });
+        const userId = decodeURIComponent(params.get('userId') || '67890'); // Default userId for testing
+        const apiUrl = 'https://howdies.app/api/user?userId=' + encodeURIComponent(userId); // Replace with actual API endpoint
 
-        if (debug) {
-            const card = document.getElementById('card');
-            card.className = 'card-wrapper debug-mode';
-            card.innerHTML = `<pre>${JSON.stringify(paramObj, null, 2)}</pre>`;
-        } else {
-            const username = decodeURIComponent(params.get('username') || 'Guest');
-            const userId = decodeURIComponent(params.get('userId') || 'Unknown');
-            const avatar = decodeURIComponent(params.get('avatar') || '');
-            const role = decodeURIComponent(params.get('role') || 'Member');
-            const joinDate = decodeURIComponent(params.get('joinDate') || 'N/A');
-            const status = decodeURIComponent(params.get('status') || 'Offline');
+        async function fetchUserData() {
+            try {
+                const response = await fetch(apiUrl, {
+                    method: 'GET',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                if (!response.ok) throw new Error('API fetch failed: ' + response.status);
+                const data = await response.json();
+                return {
+                    username: data.username || 'Guest',
+                    userId: data.userId || userId,
+                    avatar: data.avatar || '',
+                    role: data.role || 'Member',
+                    joinDate: data.joinDate || 'N/A',
+                    status: data.status || 'Offline'
+                };
+            } catch (error) {
+                console.error('Fetch error:', error);
+                return {
+                    username: decodeURIComponent(params.get('username') || 'Guest'),
+                    userId: userId,
+                    avatar: decodeURIComponent(params.get('avatar') || ''),
+                    role: decodeURIComponent(params.get('role') || 'Member'),
+                    joinDate: decodeURIComponent(params.get('joinDate') || 'N/A'),
+                    status: decodeURIComponent(params.get('status') || 'Offline'),
+                    error: error.message
+                };
+            }
+        }
 
-            document.getElementById('username').textContent = username !== '$username$' && username.trim() !== '' ? username : 'Guest';
-            document.getElementById('userId').textContent = userId !== '$userId$' && userId.trim() !== '' ? userId : 'Unknown';
+        (async () => {
+            const data = await fetchUserData();
+            const paramObj = { ...data, source: data.error ? 'URL params (API failed)' : 'API' };
+
+            if (debug) {
+                const card = document.getElementById('card');
+                card.className = 'card-wrapper debug-mode';
+                card.innerHTML = `<pre>${JSON.stringify(paramObj, null, 2)}</pre>`;
+                return;
+            }
+
+            document.getElementById('username').textContent = data.username !== '$username$' && data.username.trim() !== '' ? data.username : 'Guest';
+            document.getElementById('userId').textContent = data.userId !== '$userId$' && data.userId.trim() !== '' ? data.userId : 'Unknown';
 
             const avatarElement = document.getElementById('avatar');
             const defaultAvatar = 'https://robohash.org/guest.png?size=80x80';
-            avatarElement.src = avatar && avatar !== '$avatar$' && avatar.trim() !== '' ? avatar : defaultAvatar;
+            avatarElement.src = data.avatar && data.avatar !== '$avatar$' && data.avatar.trim() !== '' ? data.avatar : defaultAvatar;
             avatarElement.onerror = () => { avatarElement.src = defaultAvatar; };
 
             const roleElement = document.getElementById('role');
             const roleBadge = document.getElementById('roleBadge');
-            const validRole = role !== '$role$' && role.trim() !== '' ? role : 'Member';
+            const validRole = data.role !== '$role$' && data.role.trim() !== '' ? data.role : 'Member';
             roleElement.textContent = validRole;
             roleBadge.textContent = validRole.toLowerCase() === 'admin' ? '🛡️ Admin' : validRole.toLowerCase() === 'moderator' ? '⭐ Moderator' : '👤 Member';
 
-            document.getElementById('joinDate').textContent = joinDate !== '$joinDate$' && joinDate.trim() !== '' ? joinDate : 'N/A';
+            document.getElementById('joinDate').textContent = data.joinDate !== '$joinDate$' && data.joinDate.trim() !== '' ? data.joinDate : 'N/A';
 
             const statusElement = document.getElementById('status');
             const statusIndicator = document.getElementById('statusIndicator');
-            const validStatus = status !== '$status$' && status.trim() !== '' ? status : 'Offline';
+            const validStatus = data.status !== '$status$' && data.status.trim() !== '' ? data.status : 'Offline';
             statusElement.textContent = validStatus;
             statusIndicator.className = 'status-indicator ' + (validStatus.toLowerCase() === 'online' ? 'status-online' : 'status-offline');
-        }
+        })();
     </script>
 </body>
 </html>
